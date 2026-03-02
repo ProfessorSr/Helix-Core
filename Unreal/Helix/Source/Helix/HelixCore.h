@@ -31,6 +31,7 @@ public:
 
     // State query
     EPhase GetPhase() const { return CurrentPhase; }
+    float GetFixedStep() const;
 
 private:
 

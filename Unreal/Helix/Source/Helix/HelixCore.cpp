@@ -78,3 +78,8 @@ void FHelixCore::RequirePhase(EPhase Required) const
         throw std::runtime_error("Illegal phase transition.");
     }
 }
+
+float FHelixCore::GetFixedStep() const
+{
+    return FixedStep;
+}

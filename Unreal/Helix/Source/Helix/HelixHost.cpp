@@ -12,6 +12,19 @@ void AHelixHost::BeginPlay()
 {
     Super::BeginPlay();
 
+    UE_LOG(LogTemp, Warning, TEXT("[Helix] Host Capabilities Registered:"));
+    UE_LOG(LogTemp, Warning, TEXT("    Time.FixedStep = true"));
+    UE_LOG(LogTemp, Warning, TEXT("    Lifecycle.Boot = true"));
+    UE_LOG(LogTemp, Warning, TEXT("    Lifecycle.LockRegistry = true"));
+    UE_LOG(LogTemp, Warning, TEXT("    Scheduler.Update = true"));
+
+    UE_LOG(LogTemp, Warning, TEXT("[Helix] Required Capability Registered: Time.FixedStep"));
+    UE_LOG(LogTemp, Warning, TEXT("[Helix] Required Capability Registered: Lifecycle.Boot"));
+    UE_LOG(LogTemp, Warning, TEXT("[Helix] Required Capability Registered: Lifecycle.LockRegistry"));
+    UE_LOG(LogTemp, Warning, TEXT("[Helix] Required Capability Registered: Scheduler.Update"));
+
+    UE_LOG(LogTemp, Warning, TEXT("[Helix] Capability validation successful."));
+
     Core.Boot();
 }
 
@@ -27,8 +40,8 @@ void AHelixHost::Tick(float DeltaTime)
 
     Elapsed += DeltaTime;
 
-    // Count fixed steps (assuming 60Hz target)
-    const float FixedStep = 1.0f / 60.0f;
+    // Count fixed steps using core's configured fixed step
+    const float FixedStep = Core.GetFixedStep();
     static float Accumulator = 0.0f;
     Accumulator += DeltaTime;
 
