@@ -1,0 +1,11 @@
+#pragma once
+
+class IEvent
+{
+public:
+    virtual ~IEvent() = default;
+
+    virtual void Initialize() = 0;
+    virtual void Update(float FixedDeltaTime) = 0;
+    virtual void Shutdown() = 0;
+};

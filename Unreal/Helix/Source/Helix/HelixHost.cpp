@@ -25,7 +25,71 @@ void AHelixHost::BeginPlay()
 
     UE_LOG(LogTemp, Warning, TEXT("[Helix] Capability validation successful."));
 
+    // -------------------------------
+    // Subsystem Wiring
+    // -------------------------------
+
+    Time.Initialize();
+    Input.Initialize();
+    Event.Initialize();
+    World.Initialize();
+
+    Physics.Initialize();
+    Vehicle.Initialize();
+    Character.Initialize();
+    Camera.Initialize();
+    Animation.Initialize();
+    AI.Initialize();
+
+    Climate.Initialize();
+    Audio.Initialize();
+    Lighting.Initialize();
+
+    Networking.Initialize();
+    Replication.Initialize();
+    SaveLoad.Initialize();
+    Economy.Initialize();
+
+    Core.RegisterSubsystem([this](float Step)
+    {
+        Time.Update(Step);
+        Input.Update(Step);
+        Event.Update(Step);
+        World.Update(Step);
+
+        Physics.Update(Step);
+        Vehicle.Update(Step);
+        Character.Update(Step);
+        Camera.Update(Step);
+        Animation.Update(Step);
+        AI.Update(Step);
+
+        Climate.Update(Step);
+        Audio.Update(Step);
+        Lighting.Update(Step);
+
+        Networking.Update(Step);
+        Replication.Update(Step);
+        SaveLoad.Update(Step);
+        Economy.Update(Step);
+    });
+
     Core.Boot();
+
+    // ----------------------------------------------------------------
+    // Subsystem Wiring Example
+    // ----------------------------------------------------------------
+    // Example pattern when adding a subsystem:
+    //
+    // MySubsystem.Initialize();
+    //
+    // Core.RegisterSubsystem([this](float Step)
+    // {
+    //     MySubsystem.Update(Step);
+    // });
+    //
+    // Then call MySubsystem.Shutdown() inside EndPlay().
+    // ----------------------------------------------------------------
 }
 
 // Called every frame
@@ -74,6 +138,31 @@ void AHelixHost::Tick(float DeltaTime)
 
 void AHelixHost::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+    // ----------------------------------------------------------------
+    // Subsystem Shutdown Example
+    // ----------------------------------------------------------------
+    // MySubsystem.Shutdown();
+    // ----------------------------------------------------------------
+    Time.Shutdown();
+    Input.Shutdown();
+    Event.Shutdown();
+    World.Shutdown();
+
+    Physics.Shutdown();
+    Vehicle.Shutdown();
+    Character.Shutdown();
+    Camera.Shutdown();
+    Animation.Shutdown();
+    AI.Shutdown();
+
+    Climate.Shutdown();
+    Audio.Shutdown();
+    Lighting.Shutdown();
+
+    Networking.Shutdown();
+    Replication.Shutdown();
+    SaveLoad.Shutdown();
+    Economy.Shutdown();
     Core.Shutdown();
 
     Super::EndPlay(EndPlayReason);
