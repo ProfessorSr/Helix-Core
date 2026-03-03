@@ -51,7 +51,7 @@ function RobloxHost:Start()
     local elapsed = 0
     local fixedStepCount = 0
     local accumulator = 0
-    local fixedStep = 1 / HelixConfig.TickRate
+    local fixedStep = 1 / HelixConfig:Get("TickRate")
 
     RunService.Heartbeat:Connect(function()
         local now = tick()

@@ -1,15 +1,17 @@
-
 ----------------------------------------------------------------
 -- FILE: TestSubsystem
 ----------------------------------------------------------------
 
 local TestSubsystem = {}
-local counter = 0
+
+local TimeAuthority = require(script.Parent.Parent.Parent.Core.Authorities.TimeAuthority)
 
 function TestSubsystem:Tick()
-    counter += 1
-    if counter % 60 == 0 then
-        print("[TestSubsystem] 1 second elapsed at 60Hz")
+    local tick = TimeAuthority:GetTickIndex()
+    local tps = TimeAuthority:GetTicksPerSecond()
+
+    if tick % tps == 0 then
+        print("[TestSubsystem] 1 second elapsed at " .. tps .. "Hz")
     end
 end
 
