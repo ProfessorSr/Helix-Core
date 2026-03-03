@@ -1,0 +1,10 @@
+#pragma once
+#include "ISaveLoad.h"
+
+class UnrealSaveLoadAdapter : public ISaveLoad
+{
+public:
+    void Initialize() override;
+    void Update(float FixedDeltaTime) override;
+    void Shutdown() override;
+};
