@@ -1,18 +1,38 @@
---[[
-----------------------------------------------------------------
--- FILE: StepDebuggerReader
--- TYPE: Host Reader (Roblox Implementation)
--- DOMAIN: Simulation/StepDebugger
--- LAST UPDATED (UTC): 2026-03-03T06:46:48Z
-----------------------------------------------------------------
-]]
+local StepDebuggerReader = {}
 
-local StepDebuggerReader = {} 
+local HostAdapterUtils = require(script.Parent.Parent:WaitForChild("HostAdapterUtils"))
 
-function StepDebuggerReader:Initialize(context)
-    self.Context = context
+local SERVICE_NAME = "Stats"
+
+function StepDebuggerReader:Initialize(kernel)
+    self.Kernel = kernel
+    self.Service = HostAdapterUtils.TryGetService(SERVICE_NAME)
+    self.LastSample = nil
 end
 
--- Add host read operations here
+function StepDebuggerReader:Tick(dt)
+    if not self.Service then
+        return
+    end
+
+    local sample = HostAdapterUtils.NewSnapshot("StepDebugger", SERVICE_NAME, dt)
+
+    local okMem, mem = pcall(self.Service.GetTotalMemoryUsageMb, self.Service)
+    if okMem then
+        sample.Data.MemoryMB = mem
+    end
+
+    HostAdapterUtils.CommitSnapshot(self, sample)
+end
+
+function StepDebuggerReader:ReadSnapshot()
+    return self.LastSample
+end
+
+function StepDebuggerReader:Shutdown()
+    self.LastSample = nil
+    self.Service = nil
+    self.Kernel = nil
+end
 
 return StepDebuggerReader

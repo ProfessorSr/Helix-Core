@@ -1,18 +1,40 @@
---[[
-----------------------------------------------------------------
--- FILE: CameraReader
--- TYPE: Host Reader (Roblox Implementation)
--- DOMAIN: Core/Camera
--- LAST UPDATED (UTC): 2026-03-03T06:41:13Z
-----------------------------------------------------------------
-]]
+local CameraReader = {}
 
-local CameraReader = {} 
+local HostAdapterUtils = require(script.Parent.Parent:WaitForChild("HostAdapterUtils"))
 
-function CameraReader:Initialize(context)
-    self.Context = context
+local SERVICE_NAME = "Workspace"
+
+function CameraReader:Initialize(kernel)
+    self.Kernel = kernel
+    self.Service = HostAdapterUtils.TryGetService(SERVICE_NAME)
+    self.LastSample = nil
 end
 
--- Add host read operations below
+function CameraReader:Tick(dt)
+    if not self.Service then
+        return
+    end
+
+    local sample = HostAdapterUtils.NewSnapshot("Camera", SERVICE_NAME, dt)
+
+    local cam = self.Service.CurrentCamera
+    if cam then
+        sample.Data.FieldOfView = cam.FieldOfView
+        sample.Data.CameraType = tostring(cam.CameraType)
+        sample.Data.Position = cam.CFrame.Position
+    end
+
+    HostAdapterUtils.CommitSnapshot(self, sample)
+end
+
+function CameraReader:ReadSnapshot()
+    return self.LastSample
+end
+
+function CameraReader:Shutdown()
+    self.LastSample = nil
+    self.Service = nil
+    self.Kernel = nil
+end
 
 return CameraReader

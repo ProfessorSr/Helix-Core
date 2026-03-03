@@ -1,18 +1,38 @@
---[[
-----------------------------------------------------------------
--- FILE: ComponentReader
--- TYPE: Host Reader (Roblox Implementation)
--- DOMAIN: Expansion/Component
--- LAST UPDATED (UTC): 2026-03-03T06:43:28Z
-----------------------------------------------------------------
-]]
+local ComponentReader = {}
 
-local ComponentReader = {} 
+local HostAdapterUtils = require(script.Parent.Parent:WaitForChild("HostAdapterUtils"))
 
-function ComponentReader:Initialize(context)
-    self.Context = context
+local SERVICE_NAME = "CollectionService"
+
+function ComponentReader:Initialize(kernel)
+    self.Kernel = kernel
+    self.Service = HostAdapterUtils.TryGetService(SERVICE_NAME)
+    self.LastSample = nil
 end
 
--- Host read operations go here
+function ComponentReader:Tick(dt)
+    if not self.Service then
+        return
+    end
+
+    local sample = HostAdapterUtils.NewSnapshot("Component", SERVICE_NAME, dt)
+
+    local okTags, tags = pcall(self.Service.GetAllTags, self.Service)
+    if okTags and tags then
+        sample.Data.TagCount = #tags
+    end
+
+    HostAdapterUtils.CommitSnapshot(self, sample)
+end
+
+function ComponentReader:ReadSnapshot()
+    return self.LastSample
+end
+
+function ComponentReader:Shutdown()
+    self.LastSample = nil
+    self.Service = nil
+    self.Kernel = nil
+end
 
 return ComponentReader

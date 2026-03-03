@@ -19,7 +19,7 @@ local EnterpriseHosts = Hosts:WaitForChild("Enterprise")
 local ExpansionHosts = Hosts:WaitForChild("Expansion")
 local SimulationHosts = Hosts:WaitForChild("Simulation")
 
-local function entry(name, domain, phase, subsystemModule, readerModule, writerModule)
+local function entry(name, domain, phase, subsystemModule, readerModule, writerModule, dependencies)
     return {
         Name = name,
         Domain = domain,
@@ -28,6 +28,7 @@ local function entry(name, domain, phase, subsystemModule, readerModule, writerM
         Module = subsystemModule,
         ReaderModule = readerModule,
         WriterModule = writerModule,
+        Dependencies = dependencies,
     }
 end
 
@@ -37,10 +38,10 @@ return {
     entry("CameraSubsystem", "Core", 1, CoreSubsystems:WaitForChild("CameraSubsystem"), CoreHosts:WaitForChild("CameraReader"), CoreHosts:WaitForChild("CameraWriter")),
     entry("EventSubsystem", "Core", 1, CoreSubsystems:WaitForChild("EventSubsystem"), CoreHosts:WaitForChild("EventReader"), CoreHosts:WaitForChild("EventWriter")),
     entry("InputSubsystem", "Core", 1, CoreSubsystems:WaitForChild("InputSubsystem"), CoreHosts:WaitForChild("InputReader"), CoreHosts:WaitForChild("InputWriter")),
-    entry("NetworkingSubsystem", "Core", 1, CoreSubsystems:WaitForChild("NetworkingSubsystem"), CoreHosts:WaitForChild("NetworkingReader"), CoreHosts:WaitForChild("NetworkingWriter")),
-    entry("PhysicsSubsystem", "Core", 1, CoreSubsystems:WaitForChild("PhysicsSubsystem"), CoreHosts:WaitForChild("PhysicsReader"), CoreHosts:WaitForChild("PhysicsWriter")),
+    entry("NetworkingSubsystem", "Core", 1, CoreSubsystems:WaitForChild("NetworkingSubsystem"), CoreHosts:WaitForChild("NetworkingReader"), CoreHosts:WaitForChild("NetworkingWriter"), { "PhysicsSubsystem" }),
+    entry("PhysicsSubsystem", "Core", 1, CoreSubsystems:WaitForChild("PhysicsSubsystem"), CoreHosts:WaitForChild("PhysicsReader"), CoreHosts:WaitForChild("PhysicsWriter"), { "WorldSubsystem" }),
     entry("TimeSubsystem", "Core", 1, CoreSubsystems:WaitForChild("TimeSubsystem"), CoreHosts:WaitForChild("TimeReader"), CoreHosts:WaitForChild("TimeWriter")),
-    entry("TransformSubsystem", "Core", 1, CoreSubsystems:WaitForChild("TransformSubsystem"), CoreHosts:WaitForChild("TransformReader"), CoreHosts:WaitForChild("TransformWriter")),
+    entry("TransformSubsystem", "Core", 1, CoreSubsystems:WaitForChild("TransformSubsystem"), CoreHosts:WaitForChild("TransformReader"), CoreHosts:WaitForChild("TransformWriter"), { "PhysicsSubsystem" }),
     entry("WorldSubsystem", "Core", 1, CoreSubsystems:WaitForChild("WorldSubsystem"), CoreHosts:WaitForChild("WorldReader"), CoreHosts:WaitForChild("WorldWriter")),
 
     entry("AccountSubsystem", "Enterprise", 2, EnterpriseSubsystems:WaitForChild("AccountSubsystem"), EnterpriseHosts:WaitForChild("AccountReader"), EnterpriseHosts:WaitForChild("AccountWriter")),

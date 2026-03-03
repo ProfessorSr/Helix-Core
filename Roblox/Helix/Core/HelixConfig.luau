@@ -19,9 +19,68 @@ local _defaults = {
     FailOnMissingCapability = true,
     DebugLogging = true,
     Seed = HelixConfig.DefaultSeed,
+    ReplayCaptureEnabled = true,
+    ReplayCaptureMaxEntries = 4096,
+    CameraControlSource = "Host",
+    InputControlSource = "Helix",
+    AudioControlSource = "Helix",
+    DefaultSubsystemControlSource = "Helix",
+    AnimationControlSource = "Helix",
+    EventControlSource = "Helix",
+    NetworkingControlSource = "Helix",
+    PhysicsControlSource = "Helix",
+    PhysicsFixedStep = 1 / 60,
+    PhysicsMaxSubsteps = 4,
+    PhysicsMaxFrameTime = 1 / 10,
+    PhysicsGravity = 196.2,
+    PhysicsRewindCaptureInterval = 1,
+    PhysicsConstraintIterations = 4,
+    PhysicsCollisionIterations = 2,
+    PhysicsMaxCollisionRecordsPerStep = 512,
+    PhysicsCaptureStateDiff = true,
+    PhysicsMaxSpeed = 2048,
+    PhysicsPenetrationSlop = 0.001,
+    PhysicsBaumgarte = 0.25,
+    PhysicsMaxCorrection = 1.0,
+    PhysicsSleepVelocity = 0.01,
+    PhysicsSleepFrames = 30,
+    TimeControlSource = "Helix",
+    TransformControlSource = "Helix",
+    HostPhysicsNeutralizationPolicy = "AnchorNoCollide",
+    WorldControlSource = "Helix",
+    AccountControlSource = "Helix",
+    PersistenceControlSource = "Helix",
+    PolicyControlSource = "Helix",
+    SecurityControlSource = "Helix",
+    TelemetryControlSource = "Helix",
+    AssetControlSource = "Helix",
+    ComponentControlSource = "Helix",
+    ReplicationControlSource = "Helix",
+    ScriptingControlSource = "Helix",
+    StateSyncControlSource = "Helix",
+    UIControlSource = "Helix",
+    SimulationControlSource = "Helix",
+    StepDebuggerControlSource = "Helix",
+    TimeScaleControlSource = "Helix",
+    ProfilingEnabled = true,
+    AuthoritativeNetworkingEnabled = true,
+    NetworkingMaxFutureTicks = 3,
+    NetworkingMaxPastTicks = 6,
+    NetworkingMaxInputsPerTick = 512,
+    NetworkingMaxInputsPerPlayerPerTick = 16,
+    NetworkingMaxRecentRejects = 128,
 }
 
 local _config = {}
+
+local function sortedKeys(source)
+    local keys = {}
+    for key in pairs(source) do
+        keys[#keys + 1] = key
+    end
+    table.sort(keys)
+    return keys
+end
 
 -- Deep copy defaults
 local function copyDefaults()
@@ -58,13 +117,22 @@ function HelixConfig:Initialize(overrideTable)
     end
 
     print("[Helix] Final Configuration:")
-    for k, v in pairs(_config) do
+    for _, k in ipairs(sortedKeys(_config)) do
+        local v = _config[k]
         print("   ", k, "=", v)
     end
 end
 
 function HelixConfig:Get(key)
     return _config[key]
+end
+
+function HelixConfig:GetAll()
+    local snapshot = {}
+    for key, value in pairs(_config) do
+        snapshot[key] = value
+    end
+    return snapshot
 end
 
 function HelixConfig:Set(key, value)

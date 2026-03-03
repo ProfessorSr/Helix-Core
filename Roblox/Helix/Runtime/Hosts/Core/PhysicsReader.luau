@@ -1,18 +1,38 @@
---[[
-----------------------------------------------------------------
--- FILE: PhysicsReader
--- TYPE: Host Reader (Roblox Implementation)
--- DOMAIN: Core/Physics
--- LAST UPDATED (UTC): 2026-03-03T06:41:13Z
-----------------------------------------------------------------
-]]
+local PhysicsReader = {}
 
-local PhysicsReader = {} 
+local HostAdapterUtils = require(script.Parent.Parent:WaitForChild("HostAdapterUtils"))
 
-function PhysicsReader:Initialize(context)
-    self.Context = context
+local SERVICE_NAME = "PhysicsService"
+
+function PhysicsReader:Initialize(kernel)
+    self.Kernel = kernel
+    self.Service = HostAdapterUtils.TryGetService(SERVICE_NAME)
+    self.LastSample = nil
 end
 
--- Add host read operations below
+function PhysicsReader:Tick(dt)
+    if not self.Service then
+        return
+    end
+
+    local sample = HostAdapterUtils.NewSnapshot("Physics", SERVICE_NAME, dt)
+
+    local okGroups, groups = pcall(self.Service.GetRegisteredCollisionGroups, self.Service)
+    if okGroups and groups then
+        sample.Data.CollisionGroupCount = #groups
+    end
+
+    HostAdapterUtils.CommitSnapshot(self, sample)
+end
+
+function PhysicsReader:ReadSnapshot()
+    return self.LastSample
+end
+
+function PhysicsReader:Shutdown()
+    self.LastSample = nil
+    self.Service = nil
+    self.Kernel = nil
+end
 
 return PhysicsReader

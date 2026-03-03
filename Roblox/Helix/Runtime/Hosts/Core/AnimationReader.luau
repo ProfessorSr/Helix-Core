@@ -1,18 +1,35 @@
---[[
-----------------------------------------------------------------
--- FILE: AnimationReader
--- TYPE: Host Reader (Roblox Implementation)
--- DOMAIN: Core/Animation
--- LAST UPDATED (UTC): 2026-03-03T06:41:13Z
-----------------------------------------------------------------
-]]
+local AnimationReader = {}
 
-local AnimationReader = {} 
+local HostAdapterUtils = require(script.Parent.Parent:WaitForChild("HostAdapterUtils"))
 
-function AnimationReader:Initialize(context)
-    self.Context = context
+local SERVICE_NAME = "AnimationClipProvider"
+
+function AnimationReader:Initialize(kernel)
+    self.Kernel = kernel
+    self.Service = HostAdapterUtils.TryGetService(SERVICE_NAME)
+    self.LastSample = nil
 end
 
--- Add host read operations below
+function AnimationReader:Tick(dt)
+    if not self.Service then
+        return
+    end
+
+    local sample = HostAdapterUtils.NewSnapshot("Animation", SERVICE_NAME, dt)
+
+    sample.Data.ProviderReady = self.Service ~= nil
+
+    HostAdapterUtils.CommitSnapshot(self, sample)
+end
+
+function AnimationReader:ReadSnapshot()
+    return self.LastSample
+end
+
+function AnimationReader:Shutdown()
+    self.LastSample = nil
+    self.Service = nil
+    self.Kernel = nil
+end
 
 return AnimationReader

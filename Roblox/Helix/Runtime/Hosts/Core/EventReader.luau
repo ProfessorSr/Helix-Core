@@ -1,18 +1,36 @@
---[[
-----------------------------------------------------------------
--- FILE: EventReader
--- TYPE: Host Reader (Roblox Implementation)
--- DOMAIN: Core/Event
--- LAST UPDATED (UTC): 2026-03-03T06:41:13Z
-----------------------------------------------------------------
-]]
+local EventReader = {}
 
-local EventReader = {} 
+local HostAdapterUtils = require(script.Parent.Parent:WaitForChild("HostAdapterUtils"))
 
-function EventReader:Initialize(context)
-    self.Context = context
+local SERVICE_NAME = "RunService"
+
+function EventReader:Initialize(kernel)
+    self.Kernel = kernel
+    self.Service = HostAdapterUtils.TryGetService(SERVICE_NAME)
+    self.LastSample = nil
 end
 
--- Add host read operations below
+function EventReader:Tick(dt)
+    if not self.Service then
+        return
+    end
+
+    local sample = HostAdapterUtils.NewSnapshot("Event", SERVICE_NAME, dt)
+
+    sample.Data.IsServer = self.Service:IsServer()
+    sample.Data.IsStudio = self.Service:IsStudio()
+
+    HostAdapterUtils.CommitSnapshot(self, sample)
+end
+
+function EventReader:ReadSnapshot()
+    return self.LastSample
+end
+
+function EventReader:Shutdown()
+    self.LastSample = nil
+    self.Service = nil
+    self.Kernel = nil
+end
 
 return EventReader

@@ -1,18 +1,36 @@
---[[
-----------------------------------------------------------------
--- FILE: AccountReader
--- TYPE: Host Reader (Roblox Implementation)
--- DOMAIN: Enterprise/Account
--- LAST UPDATED (UTC): 2026-03-03T06:44:24Z
-----------------------------------------------------------------
-]]
+local AccountReader = {}
 
-local AccountReader = {} 
+local HostAdapterUtils = require(script.Parent.Parent:WaitForChild("HostAdapterUtils"))
 
-function AccountReader:Initialize(context)
-    self.Context = context
+local SERVICE_NAME = "Players"
+
+function AccountReader:Initialize(kernel)
+    self.Kernel = kernel
+    self.Service = HostAdapterUtils.TryGetService(SERVICE_NAME)
+    self.LastSample = nil
 end
 
--- Host read operations go here
+function AccountReader:Tick(dt)
+    if not self.Service then
+        return
+    end
+
+    local sample = HostAdapterUtils.NewSnapshot("Account", SERVICE_NAME, dt)
+
+    local players = self.Service:GetPlayers()
+    sample.Data.PlayerCount = #players
+
+    HostAdapterUtils.CommitSnapshot(self, sample)
+end
+
+function AccountReader:ReadSnapshot()
+    return self.LastSample
+end
+
+function AccountReader:Shutdown()
+    self.LastSample = nil
+    self.Service = nil
+    self.Kernel = nil
+end
 
 return AccountReader

@@ -1,18 +1,35 @@
---[[
-----------------------------------------------------------------
--- FILE: AssetReader
--- TYPE: Host Reader (Roblox Implementation)
--- DOMAIN: Expansion/Asset
--- LAST UPDATED (UTC): 2026-03-03T06:43:28Z
-----------------------------------------------------------------
-]]
+local AssetReader = {}
 
-local AssetReader = {} 
+local HostAdapterUtils = require(script.Parent.Parent:WaitForChild("HostAdapterUtils"))
 
-function AssetReader:Initialize(context)
-    self.Context = context
+local SERVICE_NAME = "ContentProvider"
+
+function AssetReader:Initialize(kernel)
+    self.Kernel = kernel
+    self.Service = HostAdapterUtils.TryGetService(SERVICE_NAME)
+    self.LastSample = nil
 end
 
--- Host read operations go here
+function AssetReader:Tick(dt)
+    if not self.Service then
+        return
+    end
+
+    local sample = HostAdapterUtils.NewSnapshot("Asset", SERVICE_NAME, dt)
+
+    sample.Data.RequestQueueSize = self.Service.RequestQueueSize
+
+    HostAdapterUtils.CommitSnapshot(self, sample)
+end
+
+function AssetReader:ReadSnapshot()
+    return self.LastSample
+end
+
+function AssetReader:Shutdown()
+    self.LastSample = nil
+    self.Service = nil
+    self.Kernel = nil
+end
 
 return AssetReader

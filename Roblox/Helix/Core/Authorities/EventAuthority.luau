@@ -6,14 +6,16 @@ local _dispatchQueue = {}
 local _nextSubscriberId = 1
 local _nextEventId = 1
 local _lastErrors = {}
+local _schemaAuthority = nil
 
-function EventAuthority:Initialize()
+function EventAuthority:Initialize(schemaAuthority)
     _subscribers = {}
     _pendingQueue = {}
     _dispatchQueue = {}
     _nextSubscriberId = 1
     _nextEventId = 1
     _lastErrors = {}
+    _schemaAuthority = schemaAuthority
 end
 
 function EventAuthority:Subscribe(eventName, handler)
@@ -59,6 +61,16 @@ end
 
 function EventAuthority:Publish(eventName, payload)
     assert(type(eventName) == "string", "eventName must be a string")
+    if _schemaAuthority and _schemaAuthority.ValidateEvent and not _schemaAuthority:ValidateEvent(eventName, payload) then
+        table.insert(_lastErrors, {
+            Tick = nil,
+            EventId = _nextEventId,
+            Name = eventName,
+            SubscriberId = nil,
+            Error = "schema_validation_failed",
+        })
+        return false
+    end
 
     table.insert(_pendingQueue, {
         Id = _nextEventId,
@@ -67,6 +79,7 @@ function EventAuthority:Publish(eventName, payload)
     })
 
     _nextEventId += 1
+    return true
 end
 
 function EventAuthority:ProcessTick(tickIndex)
@@ -116,6 +129,16 @@ end
 
 function EventAuthority:GetLastErrors()
     return _lastErrors
+end
+
+function EventAuthority:Shutdown()
+    _subscribers = {}
+    _pendingQueue = {}
+    _dispatchQueue = {}
+    _nextSubscriberId = 1
+    _nextEventId = 1
+    _lastErrors = {}
+    _schemaAuthority = nil
 end
 
 return EventAuthority
