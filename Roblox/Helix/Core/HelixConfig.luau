@@ -39,23 +39,15 @@ local function mergeOverride(override)
     end
 end
 
-function HelixConfig:Initialize()
+function HelixConfig:Initialize(overrideTable)
     if _locked then
         return
     end
 
     copyDefaults()
 
-    -- Attempt project override (optional)
-    local projectFolder = script.Parent.Parent:FindFirstChild("Project")
-    if projectFolder then
-        local projectConfigModule = projectFolder:FindFirstChild("HelixProjectConfig")
-        if projectConfigModule then
-            local success, projectConfig = pcall(require, projectConfigModule)
-            if success and type(projectConfig) == "table" then
-                mergeOverride(projectConfig)
-            end
-        end
+    if type(overrideTable) == "table" then
+        mergeOverride(overrideTable)
     end
 
     -- Clamp TickRate within allowed bounds

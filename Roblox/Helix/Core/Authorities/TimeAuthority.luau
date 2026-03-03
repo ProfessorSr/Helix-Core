@@ -1,5 +1,3 @@
-local HelixConfig = require(script.Parent.Parent.HelixConfig)
-
 local TimeAuthority = {}
 
 local _tickIndex = 0
@@ -7,8 +5,11 @@ local _elapsedSeconds = 0
 local _fixedStep = 0
 local _locked = false
 
-function TimeAuthority:Initialize()
-    _fixedStep = HelixConfig:GetFixedStep()
+function TimeAuthority:Initialize(fixedStepSeconds)
+    _fixedStep = fixedStepSeconds or _fixedStep
+    if _fixedStep == 0 then
+        _fixedStep = 1 / 60
+    end
     _tickIndex = 0
     _elapsedSeconds = 0
 end

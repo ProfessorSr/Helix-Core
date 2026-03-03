@@ -1,6 +1,5 @@
 local HelixRoot = script.Parent:WaitForChild("Helix")
 
--- Authorities
 local HelixConfig = require(
     HelixRoot
         :WaitForChild("Core")
@@ -14,19 +13,22 @@ local TimeAuthority = require(
         :WaitForChild("TimeAuthority")
 )
 
--- Runtime Host
-local RobloxHost = require(
+local EventAuthority = require(
     HelixRoot
-        :WaitForChild("Runtime")
-        :WaitForChild("Hosts")
-        :WaitForChild("RobloxHost")
+        :WaitForChild("Core")
+        :WaitForChild("Authorities")
+        :WaitForChild("EventAuthority")
 )
 
--- Initialize configuration BEFORE host start
+-- Bootstrap ownership: Config only.
 HelixConfig:Initialize()
-TimeAuthority:Initialize()
 HelixConfig:Lock()
-TimeAuthority:Lock()
 
--- Start runtime host
-RobloxHost:Start()
+return {
+    Kernel = {
+        Config = HelixConfig,
+        TimeAuthority = TimeAuthority,
+        EventAuthority = EventAuthority,
+    },
+    RuntimeFolder = HelixRoot:WaitForChild("Runtime"),
+}

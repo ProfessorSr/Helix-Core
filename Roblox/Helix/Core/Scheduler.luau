@@ -4,6 +4,8 @@
 
 local Registry = require(script.Parent.Registry)
 local TimeAuthority = require(script.Parent.Authorities.TimeAuthority)
+local EventAuthority = require(script.Parent.Authorities.EventAuthority)
+local HelixConfig = require(script.Parent.HelixConfig)
 
 
 local Scheduler = {}
@@ -15,21 +17,59 @@ local seed = 0
 
 local configLocked = false
 
--- Deterministic RNG (mirrors Unreal)
-local rng = Random.new(seed)
+-- Deterministic RNG state (LCG).
+local rngState = seed
+
+local function resetRng(newSeed)
+    rngState = newSeed % 2147483647
+    if rngState <= 0 then
+        rngState = 1
+    end
+end
+
+local function nextRandom()
+    rngState = (rngState * 16807) % 2147483647
+    return (rngState - 1) / 2147483646
+end
+
+resetRng(seed)
 
 local accumulator = 0
 local timeScale = 1
+local authoritiesReady = false
+
+local function ensureAuthoritiesInitialized()
+    if authoritiesReady then
+        return
+    end
+
+    local fixedStep = HelixConfig:GetFixedStep()
+    TimeAuthority:Initialize(fixedStep)
+    TimeAuthority:Lock()
+
+    if fixedStep > 0 then
+        tickRate = 1 / fixedStep
+    end
+
+    authoritiesReady = true
+end
 
 function Scheduler:GetRandom()
-    return rng:NextNumber()
+    return nextRandom()
+end
+
+function Scheduler:Start()
+    ensureAuthoritiesInitialized()
+    accumulator = 0
 end
 
 function Scheduler:Update(deltaTime)
+    ensureAuthoritiesInitialized()
+
     local scaledDelta = deltaTime * timeScale
     accumulator += scaledDelta
 
-    local fixedStep = 1 / tickRate
+    local fixedStep = TimeAuthority:GetFixedStep()
 
     local ticksProcessed = 0
 
@@ -45,7 +85,10 @@ function Scheduler:Update(deltaTime)
 end
 
 function Scheduler:RunTick()
+    ensureAuthoritiesInitialized()
+
     TimeAuthority:Advance()
+    EventAuthority:ProcessTick(TimeAuthority:GetTickIndex())
 
     for _, data in ipairs(Registry:GetOrdered()) do
         if data.instance.Tick then
@@ -64,7 +107,7 @@ function Scheduler:SetConfig(config)
     maxTicksPerFrame = config.MaxTicksPerFrame or maxTicksPerFrame
     seed = config.Seed or seed
 
-    rng = Random.new(seed)
+    resetRng(seed)
 end
 
 function Scheduler:LockConfig()

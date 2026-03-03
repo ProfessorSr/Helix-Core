@@ -16,6 +16,16 @@ function Registry:Register(name, subsystem, priority)
     }
 end
 
+function Registry:Unregister(name)
+    assert(not _locked, "Registry is locked")
+    _subsystems[name] = nil
+end
+
+function Registry:Clear()
+    assert(not _locked, "Registry is locked")
+    _subsystems = {}
+end
+
 function Registry:Lock()
     _locked = true
 end
@@ -25,8 +35,11 @@ function Registry:GetOrdered()
     for _, data in pairs(_subsystems) do
         table.insert(list, data)
     end
-    table.sort(list, function(a,b)
-        return a.priority < b.priority
+    table.sort(list, function(a, b)
+        if a.priority ~= b.priority then
+            return a.priority < b.priority
+        end
+        return tostring(a.name) < tostring(b.name)
     end)
     return list
 end
