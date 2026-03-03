@@ -36,20 +36,9 @@ void AHelixHost::Tick(float DeltaTime)
     Core.Update(DeltaTime);
 
     static float Elapsed = 0.0f;
-    static int32 FixedStepCount = 0;
+    static uint64 LastTickIndex = 0;
 
     Elapsed += DeltaTime;
-
-    // Count fixed steps using core's configured fixed step
-    const float FixedStep = Core.GetFixedStep();
-    static float Accumulator = 0.0f;
-    Accumulator += DeltaTime;
-
-    while (Accumulator >= FixedStep)
-    {
-        FixedStepCount++;
-        Accumulator -= FixedStep;
-    }
 
     if (Elapsed >= 1.0f)
     {
@@ -68,6 +57,10 @@ void AHelixHost::Tick(float DeltaTime)
             default: PhaseString = "Unknown"; break;
         }
 
+        const uint64 CurrentTickIndex = Core.GetTickIndex();
+        const int32 FixedStepCount = static_cast<int32>(CurrentTickIndex - LastTickIndex);
+        LastTickIndex = CurrentTickIndex;
+
         const float Hz = FixedStepCount / Elapsed;
 
         UE_LOG(LogTemp, Warning, TEXT("[HelixHost] Phase=%s | FixedStepsLastSecond=%d | Hz=%.2f"),
@@ -75,7 +68,6 @@ void AHelixHost::Tick(float DeltaTime)
             FixedStepCount,
             Hz);
 
-        FixedStepCount = 0;
         Elapsed = 0.0f;
     }
 }

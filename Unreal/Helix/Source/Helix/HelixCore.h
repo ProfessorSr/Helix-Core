@@ -2,6 +2,9 @@
 
 #include <vector>
 #include <functional>
+#include <cstdint>
+#include <random>
+using uint64 = uint64_t;
 
 class FHelixCore
 {
@@ -19,7 +22,8 @@ public:
         Terminated
     };
 
-    FHelixCore();
+    static constexpr float DefaultTickRate = 60.0f;
+    explicit FHelixCore(float InTickRate = DefaultTickRate);
 
     // Lifecycle
     void Boot();
@@ -32,6 +36,19 @@ public:
     // State query
     EPhase GetPhase() const { return CurrentPhase; }
     float GetFixedStep() const;
+    float GetTickRate() const;
+    uint64 GetTickIndex() const;
+    float GetElapsedSeconds() const;
+    void SetTickRate(float NewTickRate);
+
+    // Time scaling
+    float GetTimeScale() const;
+    void SetTimeScale(float NewTimeScale);
+
+    // Deterministic RNG
+    uint64 GetSeed() const;
+    void SetSeed(uint64 NewSeed);
+    uint64 NextRandom();
 
 private:
 
@@ -46,7 +63,16 @@ private:
     std::vector<std::function<void(float)>> Subsystems;
 
     float Accumulator;
+
+    float TickRate;
     float FixedStep;
+    uint64 TickIndex;
+    float ElapsedSeconds;
+
+    float TimeScale;
+
+    uint64 RandomSeed;
+    std::mt19937_64 RNG;
 
     bool bRegistryLocked;
 };
