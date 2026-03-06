@@ -72,7 +72,7 @@ bool FSubsystemRegistry::VisitNode(
     if (TempMarks.Contains(Name))
     {
         OutError = FString::Printf(TEXT("Dependency cycle detected at '%s'"), *Name.ToString());
-        UE_LOG(LogHelixRuntime, Error, TEXT("[RuntimeHost] Dependency cycle detected: %s"), *OutError);
+        UE_LOG(LogHelixRuntime, Error, TEXT("[RuntimeRouter] Dependency cycle detected: %s"), *OutError);
         return false;
     }
 
@@ -93,7 +93,7 @@ bool FSubsystemRegistry::VisitNode(
         if (!ByName.Contains(Dependency))
         {
             OutError = FString::Printf(TEXT("Subsystem '%s' depends on missing '%s'"), *Name.ToString(), *Dependency.ToString());
-            UE_LOG(LogHelixRuntime, Error, TEXT("[RuntimeHost] %s"), *OutError);
+            UE_LOG(LogHelixRuntime, Error, TEXT("[RuntimeRouter] %s"), *OutError);
             return false;
         }
 

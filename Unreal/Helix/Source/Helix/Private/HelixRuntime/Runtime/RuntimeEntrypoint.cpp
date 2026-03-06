@@ -12,7 +12,7 @@
 #include "HelixRuntime/Core/Scheduler.h"
 #include "HelixRuntime/Runtime/IReader.h"
 #include "HelixRuntime/Runtime/IWriter.h"
-#include "HelixRuntime/Runtime/RuntimeHost.h"
+#include "HelixRuntime/Runtime/RuntimeRouter.h"
 #include "HelixRuntime/Runtime/ISubsystem.h"
 #include "HelixRuntime/Simulation/PhysicsPipeline.h"
 #include "HelixRuntime/Simulation/SnapshotDiff.h"
@@ -25,6 +25,12 @@ namespace
 TAutoConsoleVariable<int32> CVarHelixDebugPanel(TEXT("helix.DebugPanel"), 1, TEXT("Enable Helix debug payload generation"));
 TAutoConsoleVariable<int32> CVarHelixProfile(TEXT("helix.Profile"), 1, TEXT("Enable Helix subsystem profiling"));
 TAutoConsoleVariable<int32> CVarHelixAuthoritativeNet(TEXT("helix.AuthoritativeNet"), 1, TEXT("Enable Helix authoritative networking"));
+
+void FoldHash(uint64& Hash, uint64 Value)
+{
+    Hash ^= Value;
+    Hash *= 1099511628211ull;
+}
 }
 
 bool FRuntimeEntrypoint::Start(const FHelixConfig& InitialConfig, const TArray<FSubsystemManifestEntry>& Manifest, FString& OutError)
@@ -46,8 +52,8 @@ bool FRuntimeEntrypoint::Start(const FHelixConfig& InitialConfig, const TArray<F
     Kernel.ReplayCertificationAuthority->Initialize();
     UE_LOG(LogHelixRuntime, Log, TEXT("[RuntimeEntrypoint] Kernel ready"));
 
-    Host = MakeShared<FRuntimeHost>();
-    if (!Host->Start(Kernel, Manifest, OutError))
+    Router = MakeShared<FRuntimeRouter>();
+    if (!Router->Start(Kernel, Manifest, OutError))
     {
         UE_LOG(LogHelixRuntime, Error, TEXT("[RuntimeEntrypoint] Failed start: %s"), *OutError);
         Stop();
@@ -71,9 +77,9 @@ void FRuntimeEntrypoint::Stop()
         return;
     }
 
-    if (Host.IsValid())
+    if (Router.IsValid())
     {
-        Host->Stop(Kernel);
+        Router->Stop(Kernel);
     }
 
     if (Kernel.ReplayCertificationAuthority.IsValid())
@@ -148,15 +154,20 @@ void FRuntimeEntrypoint::TickOneStep(double FixedDt)
         UE_LOG(LogHelixAuthority, VeryVerbose, TEXT("[GameplayAuthority] ProcessTick=%llu | InputFrames=%d"), Kernel.TimeAuthority->GetTick(), Kernel.GameplayAuthority->GetProcessedInputsThisTick());
     }
 
-    for (const FRuntimeSubsystemInstance& Instance : Host->GetOrdered())
+    static const FName PhysicsSubsystemName(TEXT("PhysicsSubsystem"));
+    static const FName UnrealControlSourceName(TEXT("Unreal"));
+    static const FName LegacyHostControlSourceName(TEXT("Host"));
+
+    for (const FRuntimeSubsystemInstance& Instance : Router->GetOrdered())
     {
-        if (!Instance.Subsystem.IsValid())
+        if (!Instance.Subsystem.IsValid() || Instance.Manifest.Name == PhysicsSubsystemName)
         {
             continue;
         }
 
         const double Start = FPlatformTime::Seconds();
-        if (Instance.Reader.IsValid() && Instance.Subsystem->GetControlSource() == TEXT("Host"))
+        const FName ControlSource = Instance.Subsystem->GetControlSource();
+        if (Instance.Reader.IsValid() && (ControlSource == UnrealControlSourceName || ControlSource == LegacyHostControlSourceName))
         {
             Instance.Reader->Tick(FixedDt);
         }
@@ -171,10 +182,40 @@ void FRuntimeEntrypoint::TickOneStep(double FixedDt)
         const double ElapsedMs = (FPlatformTime::Seconds() - Start) * 1000.0;
         Kernel.ProfilerAuthority->AddSubsystemTime(Instance.Manifest.Name, ElapsedMs);
     }
-    UE_LOG(LogHelixScheduler, VeryVerbose, TEXT("[Scheduler] Processed subsystems=%d"), Host->GetOrdered().Num());
 
-    FPhysicsPipeline Physics;
-    const FPhysicsStepStats PhysicsStats = Physics.Tick(*Kernel.Simulation, *Kernel.Config, FixedDt);
+    FPhysicsStepStats PhysicsStats;
+    if (Kernel.Config->bUseHelixPhysics)
+    {
+        FPhysicsPipeline Physics;
+        PhysicsStats = Physics.Tick(*Kernel.Simulation, *Kernel.Config, FixedDt);
+    }
+
+    for (const FRuntimeSubsystemInstance& Instance : Router->GetOrdered())
+    {
+        if (!Instance.Subsystem.IsValid() || Instance.Manifest.Name != PhysicsSubsystemName)
+        {
+            continue;
+        }
+
+        const double Start = FPlatformTime::Seconds();
+        const FName ControlSource = Instance.Subsystem->GetControlSource();
+        if (Instance.Reader.IsValid() && (ControlSource == UnrealControlSourceName || ControlSource == LegacyHostControlSourceName))
+        {
+            Instance.Reader->Tick(FixedDt);
+        }
+
+        Instance.Subsystem->Tick(FixedDt);
+
+        if (Instance.Writer.IsValid())
+        {
+            Instance.Writer->Tick(FixedDt);
+        }
+
+        const double ElapsedMs = (FPlatformTime::Seconds() - Start) * 1000.0;
+        Kernel.ProfilerAuthority->AddSubsystemTime(Instance.Manifest.Name, ElapsedMs);
+    }
+
+    UE_LOG(LogHelixScheduler, VeryVerbose, TEXT("[Scheduler] Processed subsystems=%d"), Router->GetOrdered().Num());
 
     ++Kernel.Simulation->Tick;
 
@@ -272,7 +313,7 @@ bool FRuntimeEntrypoint::QueueClientInput(FName PlayerId, const FClientInputFram
 
 bool FRuntimeEntrypoint::SetSubsystemControlSource(FName SubsystemName, FName Source)
 {
-    return Host.IsValid() ? Host->SetSubsystemControlSource(SubsystemName, Source) : false;
+    return Router.IsValid() ? Router->SetSubsystemControlSource(SubsystemName, Source) : false;
 }
 
 void FRuntimeEntrypoint::CollectInspectorData(const FPhysicsStepStats& PhysicsStats, const FSnapshotDiffResult& Diff, uint64 Hash)
@@ -284,6 +325,13 @@ void FRuntimeEntrypoint::CollectInspectorData(const FPhysicsStepStats& PhysicsSt
 
     Inspector.Tick = Kernel.Simulation->Tick;
     Inspector.StateHash = Hash;
+    Inspector.PhysicsSignature = FWorldGraph::HashPhysicsSignature(*Kernel.Simulation);
+    FoldHash(Inspector.PhysicsSignature, static_cast<uint64>(Kernel.Config->bUseHelixPhysics ? 1 : 0));
+    FoldHash(Inspector.PhysicsSignature, static_cast<uint64>(Kernel.Config->PhysicsFixedStep * 1000000.0));
+    FoldHash(Inspector.PhysicsSignature, static_cast<uint64>(Kernel.Config->PhysicsGravityZ * 1000.0));
+    FoldHash(Inspector.PhysicsSignature, static_cast<uint64>(Kernel.Config->PhysicsMaxSubsteps));
+    FoldHash(Inspector.PhysicsSignature, static_cast<uint64>(Kernel.Config->PhysicsCollisionIterations));
+    FoldHash(Inspector.PhysicsSignature, static_cast<uint64>(Kernel.Config->PhysicsConstraintIterations));
     Inspector.Diff = Diff;
     Inspector.Profile = Kernel.ProfilerAuthority->GetLastFrame();
     Inspector.Network = Kernel.NetworkingAuthority->GetLastFrameSummary();

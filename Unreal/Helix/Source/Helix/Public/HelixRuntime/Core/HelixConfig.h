@@ -9,6 +9,7 @@ struct FHelixConfig
     bool bProfileEnabled = true;
     bool bDebugPanelEnabled = true;
     bool bAuthoritativeNetEnabled = true;
+    bool bUseHelixPhysics = true;
 
     double PhysicsFixedStep = 1.0 / 60.0;
     int32 PhysicsMaxSubsteps = 4;
@@ -20,6 +21,7 @@ struct FHelixConfig
     double PhysicsMaxCorrection = 2.0;
     double PhysicsSleepVelocity = 1.0;
     int32 PhysicsSleepFrames = 8;
+    double PhysicsGravityZ = -980.0;
     int32 PhysicsMaxCollisionRecordsPerStep = 2048;
     bool bPhysicsCaptureStateDiff = true;
 

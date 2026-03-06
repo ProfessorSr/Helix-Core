@@ -41,10 +41,12 @@ private:
     void EnsureDebugPanel();
     void TeardownDebugPanel();
     void RefreshDebugPanel();
+    int32 DestroyPhysicsTestRigs();
 
     FRuntimeEntrypoint Runtime;
     FTSTicker::FDelegateHandle TickHandle;
     bool bRuntimeStarted = false;
+    bool bPendingRigCleanup = false;
     double RuntimeLogAccumulator = 0.0;
     uint64 LastLoggedTick = 0;
     TSharedPtr<class SWidget> DebugPanelRoot;

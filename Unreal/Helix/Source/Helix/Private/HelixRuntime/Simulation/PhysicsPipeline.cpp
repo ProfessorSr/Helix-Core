@@ -19,6 +19,10 @@ FPhysicsStepStats FPhysicsPipeline::Tick(FSimulationState& State, const FHelixCo
                 continue;
             }
 
+            if (Body.bEnableGravity)
+            {
+                Body.Velocity.Z += Config.PhysicsGravityZ * SubstepDt;
+            }
             Body.Position += Body.Velocity * SubstepDt;
         }
 

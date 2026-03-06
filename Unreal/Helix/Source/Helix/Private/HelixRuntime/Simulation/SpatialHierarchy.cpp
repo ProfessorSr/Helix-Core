@@ -2,6 +2,21 @@
 
 TArray<FBroadphasePair> FSpatialHierarchy::BuildPairs(const TMap<FHelixEntityId, FBodyComponent>& Bodies)
 {
+    auto ComputeHalfExtents = [](const FBodyComponent& Body) -> FVector3d
+    {
+        switch (Body.Shape)
+        {
+        case EHelixColliderShape::Sphere:
+            return FVector3d(Body.Radius, Body.Radius, Body.Radius);
+        case EHelixColliderShape::Capsule:
+            return FVector3d(Body.Radius, Body.Radius, FMath::Max(Body.Radius, Body.CapsuleHalfHeight));
+        case EHelixColliderShape::Box:
+        case EHelixColliderShape::MeshBounds:
+        default:
+            return Body.HalfExtents;
+        }
+    };
+
     struct FProxy
     {
         FHelixEntityId Id;
@@ -15,7 +30,8 @@ TArray<FBroadphasePair> FSpatialHierarchy::BuildPairs(const TMap<FHelixEntityId,
     for (const TPair<FHelixEntityId, FBodyComponent>& Entry : Bodies)
     {
         const FBodyComponent& Body = Entry.Value;
-        Proxies.Add({ Entry.Key, Body.Position.X - Body.Radius, Body.Position.X + Body.Radius });
+        const FVector3d HalfExtents = ComputeHalfExtents(Body);
+        Proxies.Add({ Entry.Key, Body.Position.X - HalfExtents.X, Body.Position.X + HalfExtents.X });
     }
 
     Proxies.Sort([](const FProxy& A, const FProxy& B)

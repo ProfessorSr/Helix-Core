@@ -13,13 +13,24 @@ bool FContentValidator::ValidateAndSanitizeBody(FBodyComponent& Body, FString& O
         return false;
     }
 
-    if (!IsFinite(Body.Mass) || Body.Mass <= 0.0)
+    if (!IsFinite(Body.Mass))
     {
         Body.Mass = 1.0;
     }
 
-    Body.Mass = FMath::Clamp(Body.Mass, 0.001, 10000.0);
+    Body.Mass = FMath::Clamp(Body.Mass, 0.0, 10000.0);
     Body.Radius = FMath::Clamp(Body.Radius, 0.01, 100000.0);
+    Body.HalfExtents.X = FMath::Clamp(FMath::Abs(Body.HalfExtents.X), 0.01, 100000.0);
+    Body.HalfExtents.Y = FMath::Clamp(FMath::Abs(Body.HalfExtents.Y), 0.01, 100000.0);
+    Body.HalfExtents.Z = FMath::Clamp(FMath::Abs(Body.HalfExtents.Z), 0.01, 100000.0);
+    Body.CapsuleHalfHeight = FMath::Clamp(FMath::Abs(Body.CapsuleHalfHeight), Body.Radius, 100000.0);
+    if (Body.Shape != EHelixColliderShape::Sphere &&
+        Body.Shape != EHelixColliderShape::Box &&
+        Body.Shape != EHelixColliderShape::Capsule &&
+        Body.Shape != EHelixColliderShape::MeshBounds)
+    {
+        Body.Shape = EHelixColliderShape::Sphere;
+    }
 
     return true;
 }

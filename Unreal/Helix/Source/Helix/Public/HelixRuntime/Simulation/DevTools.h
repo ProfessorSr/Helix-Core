@@ -10,6 +10,7 @@ struct FDebugInspectorData
 {
     int32 Tick = 0;
     uint64 StateHash = 0;
+    uint64 PhysicsSignature = 0;
     FSnapshotDiffResult Diff;
     FSubsystemProfileFrame Profile;
     FAuthoritativeFrameSummary Network;

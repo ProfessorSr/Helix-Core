@@ -3,3 +3,9 @@ Unreal/Helix/Binaries/
 Unreal/Helix/Intermediate/
 Unreal/Helix/Saved/
 Unreal/Helix/DerivedDataCache/
+Roblox/
+*.luau
+Helix-Core.sln
+.vscode/tasks.json
+Roblox/Helix/Runtime/Tools/ServerDebugPanel.luau
+*.luau

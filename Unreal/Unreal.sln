@@ -1,0 +1,38 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Helix", "Helix", "{A5006E76-1B1C-C821-4AC4-3099275E90E9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Intermediate", "Intermediate", "{6F6FDBB4-EBBC-29F2-407D-A31A35B36D2B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{0E1AD8E8-ACA4-B9CD-963C-74CC7B884168}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildRulesProjects", "BuildRulesProjects", "{318C9F7B-233B-AE9A-D6D4-9DD953966B7F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelixModuleRules", "Helix\Intermediate\Build\BuildRulesProjects\HelixModuleRules\HelixModuleRules.csproj", "{E7546181-20C8-19E4-F0F9-173A4D182C00}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E7546181-20C8-19E4-F0F9-173A4D182C00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7546181-20C8-19E4-F0F9-173A4D182C00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7546181-20C8-19E4-F0F9-173A4D182C00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7546181-20C8-19E4-F0F9-173A4D182C00}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6F6FDBB4-EBBC-29F2-407D-A31A35B36D2B} = {A5006E76-1B1C-C821-4AC4-3099275E90E9}
+		{0E1AD8E8-ACA4-B9CD-963C-74CC7B884168} = {6F6FDBB4-EBBC-29F2-407D-A31A35B36D2B}
+		{318C9F7B-233B-AE9A-D6D4-9DD953966B7F} = {0E1AD8E8-ACA4-B9CD-963C-74CC7B884168}
+		{E7546181-20C8-19E4-F0F9-173A4D182C00} = {318C9F7B-233B-AE9A-D6D4-9DD953966B7F}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {51B7A7D9-90AF-4802-B5CB-E871DC12670E}
+	EndGlobalSection
+EndGlobal

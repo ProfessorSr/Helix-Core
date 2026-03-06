@@ -5,7 +5,7 @@ void FRewindBuffer::Push(const FSimulationState& State)
     States.Add(State);
     if (States.Num() > Capacity)
     {
-        States.RemoveAt(0, States.Num() - Capacity, false);
+        States.RemoveAt(0, States.Num() - Capacity, EAllowShrinking::No);
     }
 }
 

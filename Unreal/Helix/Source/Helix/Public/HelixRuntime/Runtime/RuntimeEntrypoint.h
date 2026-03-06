@@ -13,7 +13,7 @@ class FNetworkingAuthority;
 class FReplayCertificationAuthority;
 class FProfilerAuthority;
 class FDeterministicFixedStepScheduler;
-class FRuntimeHost;
+class FRuntimeRouter;
 struct FSimulationState;
 
 struct FHelixKernel
@@ -64,7 +64,7 @@ private:
 
     FHelixKernel Kernel;
     TSharedPtr<FDeterministicFixedStepScheduler> Scheduler;
-    TSharedPtr<FRuntimeHost> Host;
+    TSharedPtr<FRuntimeRouter> Router;
 
     bool bStarted = false;
     FDebugInspectorData Inspector;
