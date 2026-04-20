@@ -1,0 +1,41 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Unreal", "Unreal", "{33E0AF2B-7FAF-B55E-7BCE-F381B1249B6F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Helix", "Helix", "{D7C6A07A-AC23-F2ED-FEB3-A577521DAD41}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Intermediate", "Intermediate", "{34EDA916-1991-4BE5-B305-9DF461F85522}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{A32BF21E-8182-5331-8533-CF4A68AA5428}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildRulesProjects", "BuildRulesProjects", "{FA5DDC79-577A-E28A-8E29-C4275EFE0770}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelixModuleRules", "Unreal\Helix\Intermediate\Build\BuildRulesProjects\HelixModuleRules\HelixModuleRules.csproj", "{77B60FC4-E0F2-56F9-29A1-3F232172F569}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{77B60FC4-E0F2-56F9-29A1-3F232172F569}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77B60FC4-E0F2-56F9-29A1-3F232172F569}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77B60FC4-E0F2-56F9-29A1-3F232172F569}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77B60FC4-E0F2-56F9-29A1-3F232172F569}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D7C6A07A-AC23-F2ED-FEB3-A577521DAD41} = {33E0AF2B-7FAF-B55E-7BCE-F381B1249B6F}
+		{34EDA916-1991-4BE5-B305-9DF461F85522} = {D7C6A07A-AC23-F2ED-FEB3-A577521DAD41}
+		{A32BF21E-8182-5331-8533-CF4A68AA5428} = {34EDA916-1991-4BE5-B305-9DF461F85522}
+		{FA5DDC79-577A-E28A-8E29-C4275EFE0770} = {A32BF21E-8182-5331-8533-CF4A68AA5428}
+		{77B60FC4-E0F2-56F9-29A1-3F232172F569} = {FA5DDC79-577A-E28A-8E29-C4275EFE0770}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C9A0C77F-DB40-4595-88C4-4CC085643D7B}
+	EndGlobalSection
+EndGlobal
